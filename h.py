@@ -28,33 +28,33 @@ def splitBoxes(img):
     return boxes
 
 def showAnswers(img, myIndex, grading, ans, questions, choices):
-    cell_width = img.shape[1] // (choices + 1)  
+    cell_width = img.shape[1] // (choices + 1)  # Bỏ qua cột đầu tiên
     cell_height = img.shape[0] // questions
 
     for q in range(questions):
         correct_answer = ans[q]
         chosen_answer = myIndex[q]
 
+        # Trường hợp không chọn hoặc chọn nhiều đáp án
+        if chosen_answer == -1:
+            for choice in range(choices):  # Duyệt qua tất cả các ô của câu hỏi
+                x = int((choice + 1) * cell_width)  # +1 để bỏ qua cột đầu tiên
+                y = int(q * cell_height)
+                center_x = int(x + cell_width / 2)
+                center_y = int(y + cell_height / 2)
+                cv2.circle(img, (center_x, center_y), 20, (255, 165, 0), cv2.FILLED)
+            continue
+
         for choice in range(choices):
             x = int((choice + 1) * cell_width)  # +1 để bỏ qua cột đầu tiên
             y = int(q * cell_height)
-            answer_box = img[y:y + cell_height, x:x + cell_width]
+            center_x = int(x + cell_width / 2)
+            center_y = int(y + cell_height / 2)
 
-            # Chuyển đổi ô đáp án thành ảnh grayscale để phát hiện viền
-            answer_box_gray = cv2.cvtColor(answer_box, cv2.COLOR_BGR2GRAY)
-            _, thresholded = cv2.threshold(answer_box_gray, 200, 255, cv2.THRESH_BINARY_INV)
-            contours, _ = cv2.findContours(thresholded, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
-            # Nếu ô tròn đã tô
-            if contours:
-                largest_contour = max(contours, key=cv2.contourArea)
-                (circle_x, circle_y), _ = cv2.minEnclosingCircle(largest_contour)
-                center = (int(x + circle_x), int(y + circle_y))
-
-                # Vẽ chấm tròn theo kết quả
-                if choice == correct_answer:
-                    cv2.circle(img, center, 30, (0, 255, 0), cv2.FILLED)  # Chấm xanh cho đáp án đúng
-                elif choice == chosen_answer and grading[q] == 0:
-                    cv2.circle(img, center, 30, (0, 0, 255), cv2.FILLED)  # Chấm đỏ cho đáp án sai
+            # Vẽ chấm tròn theo kết quả
+            if choice == correct_answer:
+                cv2.circle(img, (center_x, center_y), 20, (0, 255, 0), cv2.FILLED)
+            elif choice == chosen_answer and grading[q] == 0:
+                cv2.circle(img, (center_x, center_y), 20, (0, 0, 255), cv2.FILLED)
 
     return img
