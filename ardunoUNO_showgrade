@@ -1,0 +1,35 @@
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
+
+// Khởi tạo đối tượng LCD 
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+
+void setup() {
+  Serial.begin(9600);  // Khởi tạo cổng Serial
+  lcd.begin(16, 2);
+  // Cài đặt màn hình LCD
+  lcd.init();
+  lcd.backlight();
+  lcd.setCursor(0, 0);
+  lcd.print("Dang cho diem...");
+}
+
+void loop() {
+  // Kiểm tra nếu có dữ liệu gửi đến từ máy tính
+  if (Serial.available() > 0) {
+    // Đọc dữ liệu
+    String receivedData = Serial.readStringUntil('\n');
+    receivedData.trim();  // Loại bỏ ký tự xuống dòng hoặc khoảng trắng thừa
+
+    // Hiển thị dữ liệu nhận được lên Serial Monitor
+    Serial.print("Du lieu nhan duoc: ");
+    Serial.println(receivedData);
+
+    // Hiển thị điểm số lên màn hình LCD
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("Diem cua ban:");
+    lcd.setCursor(0, 1);
+    lcd.print(receivedData);
+  }
+}
